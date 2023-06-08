@@ -78,6 +78,19 @@ func (itemcontroller *ItemController) UpdateItem(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "successfully Updated"})
 
 }
+func (itemcontroller *ItemController) UpdateWholeItem(ctx *gin.Context) {
+	var item models.Item
+	if err := ctx.ShouldBindJSON(&item); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	err := itemcontroller.ItemService.UpdateWholeItem(&item)
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"message": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "successfully Updated the Whole item"})
+}
 
 func (itemcontroller *ItemController) DeleteItem(ctx *gin.Context) {
 	var itemname string = ctx.Param("name")
@@ -99,5 +112,6 @@ func (itemcontroller *ItemController) RegisterItemRoues(rg *gin.RouterGroup) {
 	itemroute.GET("/:name", itemcontroller.GetItem)
 	itemroute.GET("", itemcontroller.GetAllItem)
 	itemroute.PATCH("/", itemcontroller.UpdateItem)
+	itemroute.PUT("/", itemcontroller.UpdateWholeItem)
 	itemroute.DELETE("/:name", itemcontroller.DeleteItem)
 }

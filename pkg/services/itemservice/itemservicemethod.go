@@ -83,7 +83,28 @@ func (u *ItemServiceMethod) UpdateItem(item *models.Item) error {
 	}
 	return nil
 }
+func (u *ItemServiceMethod) UpdateWholeItem(item *models.Item) error {
+	filter := bson.D{primitive.E{Key: "item_name", Value: item.Item_Name}}
+	update := bson.D{
+		primitive.E{Key: "$set", Value: bson.D{
+			primitive.E{Key: "brand", Value: item.Brand},
+			primitive.E{Key: "model", Value: item.Model},
+			primitive.E{Key: "year", Value: item.Year},
+			primitive.E{Key: "price", Value: item.Price},
+		}},
+	}
 
+	result, err := u.itemcollection.UpdateOne(u.ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount != 1 {
+		return errors.New("no matched document found for update")
+	}
+
+	return nil
+}
 func (u *ItemServiceMethod) DeleteItem(item_name *string) error {
 	filter := bson.D{primitive.E{Key: "item_name", Value: item_name}}
 	result, _ := u.itemcollection.DeleteOne(u.ctx, filter)

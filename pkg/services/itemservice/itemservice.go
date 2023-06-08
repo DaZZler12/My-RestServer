@@ -8,6 +8,7 @@ type ItemService interface {
 	CreateItem(*models.Item) error         // used to create abn item
 	GetItem(*string) (*models.Item, error) // used to get an item
 	GetAllItem() ([]*models.Item, error)   // used to get all the item and []*models.Item   --> this is a slice that will contain all the item-objects
-	UpdateItem(*models.Item) error         // used to update an item
+	UpdateItem(*models.Item) error         // used to update an item using PETCH
+	UpdateWholeItem(*models.Item) error    // used to update an whole item using the PUT
 	DeleteItem(*string) error              // used to delete an item
 }
