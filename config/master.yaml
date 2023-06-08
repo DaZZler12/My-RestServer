@@ -1,6 +1,6 @@
-mysql:
+database:
   host: localhost
   port: 27017
+  name: be-training
   username: root
   password: password
-  database: training-db
