@@ -95,9 +95,9 @@ func (itemcontroller *ItemController) RegisterItemRoues(rg *gin.RouterGroup) {
 	// here we are grouping all the item-routes
 	// under one name called as itemr
 	itemroute := rg.Group("/item")
-	itemroute.POST("/create", itemcontroller.CreateItem)
-	itemroute.GET("/get/:name", itemcontroller.GetItem)
-	itemroute.GET("/getall", itemcontroller.GetAllItem)
-	itemroute.PATCH("/update", itemcontroller.UpdateItem)
-	itemroute.DELETE("/delete/:name", itemcontroller.DeleteItem)
+	itemroute.POST("", itemcontroller.CreateItem)
+	itemroute.GET("/:name", itemcontroller.GetItem)
+	itemroute.GET("", itemcontroller.GetAllItem)
+	itemroute.PATCH("/", itemcontroller.UpdateItem)
+	itemroute.DELETE("/:name", itemcontroller.DeleteItem)
 }
