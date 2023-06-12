@@ -1,0 +1,275 @@
+definitions:
+  gin.H:
+    additionalProperties: {}
+    type: object
+  github_com_Dazzler_My-RestServer_pkg_models.Item:
+    properties:
+      brand:
+        type: string
+      created_at:
+        type: string
+      item_name:
+        type: string
+      model:
+        type: string
+      price:
+        type: number
+      year:
+        type: integer
+    type: object
+  github_com_Dazzler_My-RestServer_pkg_models.User:
+    properties:
+      id:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/item:
+    get:
+      consumes:
+      - application/json
+      description: Get all items with optional pagination parameters
+      parameters:
+      - description: Start index for pagination
+        in: query
+        name: _start
+        type: integer
+      - description: End index for pagination
+        in: query
+        name: _end
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_Dazzler_My-RestServer_pkg_models.Item'
+            type: array
+        "400":
+          description: 'message: Bad Request'
+          schema:
+            $ref: '#/definitions/gin.H'
+        "502":
+          description: 'message: Bad Gateway'
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Get all items with pagination
+      tags:
+      - item
+    patch:
+      consumes:
+      - application/json
+      description: Update an item with new data
+      parameters:
+      - description: Item object to update
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Dazzler_My-RestServer_pkg_models.Item'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'message: Successfully Updated'
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: 'message: Bad Request'
+          schema:
+            $ref: '#/definitions/gin.H'
+        "502":
+          description: 'message: Bad Gateway'
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Update an item
+      tags:
+      - item
+    post:
+      consumes:
+      - application/json
+      description: Create a new item
+      parameters:
+      - description: Item object
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Dazzler_My-RestServer_pkg_models.Item'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'message: Successfully Created'
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: 'message: Bad Request'
+          schema:
+            $ref: '#/definitions/gin.H'
+        "502":
+          description: 'message: Bad Gateway'
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Create an item
+      tags:
+      - item
+    put:
+      consumes:
+      - application/json
+      description: Update the whole item with new data
+      parameters:
+      - description: Item object to update
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Dazzler_My-RestServer_pkg_models.Item'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'message: Successfully Updated the Whole item'
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: 'message: Bad Request'
+          schema:
+            $ref: '#/definitions/gin.H'
+        "502":
+          description: 'message: Bad Gateway'
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Update the whole item
+      tags:
+      - item
+  /api/item/:name:
+    get:
+      consumes:
+      - application/json
+      description: Get an item by its name
+      parameters:
+      - description: Item name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_Dazzler_My-RestServer_pkg_models.Item'
+        "400":
+          description: 'message: Bad Request'
+          schema:
+            $ref: '#/definitions/gin.H'
+        "502":
+          description: 'message: Bad Gateway'
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Get an item
+      tags:
+      - item
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and generate JWT token
+      parameters:
+      - description: User object
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Dazzler_My-RestServer_pkg_models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'token: JWT token'
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: 'message: Bad Request'
+          schema:
+            $ref: '#/definitions/gin.H'
+        "401":
+          description: 'message: Unauthorized'
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: 'message: Internal Server Error'
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: User login
+      tags:
+      - auth
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account
+      parameters:
+      - description: User object
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Dazzler_My-RestServer_pkg_models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'message: User created successfully'
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: 'message: Bad Request'
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: 'message: Internal Server Error'
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: User signup
+      tags:
+      - auth
+  /items/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an item by name
+      parameters:
+      - description: Item name to delete
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'message: Successfully Deleted'
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: 'message: Bad Gateway'
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: 'message: Not Found'
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Delete an item
+      tags:
+      - item
+swagger: "2.0"

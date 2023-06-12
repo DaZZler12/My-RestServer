@@ -1,6 +1,11 @@
 database:
   host: localhost
   port: 27017
-  name: be-training
+  dbname: test-server # db name
   username: root
   password: password
+  usertable: user
+  itemtable: item
+
+serverconfig:
+  port: "8080"
