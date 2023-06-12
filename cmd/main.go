@@ -6,15 +6,18 @@ import (
 	"log"
 	"time"
 
-	auth "github.com/Dazzler/My-RestServer/pkg/authroute"
+	"github.com/Dazzler/My-RestServer/pkg/authroute"
 	"github.com/Dazzler/My-RestServer/pkg/database"
 	"github.com/Dazzler/My-RestServer/pkg/handler"
-	middleware "github.com/Dazzler/My-RestServer/pkg/middleware"
+	"github.com/Dazzler/My-RestServer/pkg/middleware"
 	"github.com/Dazzler/My-RestServer/pkg/services/itemservice"
 	"github.com/Dazzler/My-RestServer/pkg/services/userservice"
 	"github.com/Dazzler/My-RestServer/pkg/store"
+	masteryaml "github.com/Dazzler/My-RestServer/pkg/util"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"     // swagger embed files
+	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
 	"go.elastic.co/apm/module/apmgin"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -32,6 +35,9 @@ var (
 	err            error
 	uservice       userservice.UserService
 	uhandler       handler.UserController
+	usertable      string
+	itemtable      string
+	serverport     string
 )
 
 func init() {
@@ -45,12 +51,24 @@ func init() {
 		// if there is any error we will close the application
 		log.Fatal(err)
 	}
-	fmt.Print("database connected", mongodb)
-	itemcollection, err = store.StoreCreateCollection(mongodb, "item") //create the table by calling method from Store
+	dbconfig, err := masteryaml.ExtractYamlForDB()
 	if err != nil {
 		log.Fatal(err)
 	}
-	userCollection, err = store.StoreCreateCollection(mongodb, "user") // create the table for user
+	usertable = dbconfig.Database.Usertable
+	itemtable = dbconfig.Database.Itemtable
+	serverconfig, err := masteryaml.ExtractYamlForServer()
+	if err != nil {
+		log.Fatal(err)
+	}
+	serverport = serverconfig.Serverconfig.Port
+	serverport = ":" + serverport
+	itemcollection, err = store.StoreCreateCollection(mongodb, itemtable) //create the table by calling method from Store
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Print("database connected", itemcollection)
+	userCollection, err = store.StoreCreateCollection(mongodb, usertable) // create the table for user
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -86,21 +104,16 @@ func init() {
 	// 	authGroup.POST("/signup", uhandler.Signup)
 	// 	authGroup.POST("/login", uhandler.Login)
 	// }
-
-	// Initialize the authentication routes
-
-	auth.SetupAuthRoutes(server, uhandler)
-	// Apply the JWT authentication middleware to private routes
-	privateRoutes := server.Group("/api")
-	privateRoutes.Use(middleware.JWTAuth)
-	ihandler.RegisterItemRoues(privateRoutes)
-
 }
 
 func main() {
-
-	defer database.DisconnectMongoDB(ctx) // discount from mongo if application shutdown.
-	// basepath := r.Group("/api")           // thus path will be: ==>  /api/item/create
-	// ihandler.RegisterItemRoues(basepath)
-	log.Fatal(server.Run(":8080"))
+	defer database.DisconnectMongoDB(ctx) // disconnect from mongo if application shutdown.
+	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	// Initialize the authentication routes
+	authroute.SetupAuthRoutes(server, uhandler)
+	// Apply the JWT authentication middleware to private routes
+	privateRoutes := server.Group("/api")
+	privateRoutes.Use(middleware.JWTAuth)
+	ihandler.RegisterItemRoutes(privateRoutes)
+	log.Fatal(server.Run(serverport))
 }

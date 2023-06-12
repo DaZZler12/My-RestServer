@@ -87,6 +87,4 @@ func generateToken(userID string) (string, error) {
 	}
 
 	return signedToken, nil
-
-	// Replace the code above with your actual implementation using a JWT library
 }

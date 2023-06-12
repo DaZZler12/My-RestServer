@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	models "github.com/Dazzler/My-RestServer/pkg/models"
 	"github.com/Dazzler/My-RestServer/pkg/services/itemservice"
@@ -27,6 +28,17 @@ func NewItemHandler(itemservice itemservice.ItemService) ItemController {
 // now from the handler we will call the routes..
 // and the specific router will call the specific method..
 
+// CreateItem godoc
+// @Summary      Create an item
+// @Description  Create a new item
+// @Tags         item
+// @Accept       json
+// @Produce      json
+// @Param        item   body     models.Item  true  "Item object"
+// @Success      200  {object}  gin.H        "message: Successfully Created"
+// @Failure      400  {object}  gin.H        "message: Bad Request"
+// @Failure      502  {object}  gin.H        "message: Bad Gateway"
+// @Router       /api/item [post]
 func (itemcontroller *ItemController) CreateItem(ctx *gin.Context) {
 	var item models.Item
 	if err := ctx.ShouldBindJSON(&item); err != nil {
@@ -42,6 +54,17 @@ func (itemcontroller *ItemController) CreateItem(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Successfully Created"})
 }
 
+// GetItem godoc
+// @Summary      Get an item
+// @Description  Get an item by its name
+// @Tags         item
+// @Accept       json
+// @Produce      json
+// @Param        name   path     string  true  "Item name"
+// @Success      200  {object}  models.Item
+// @Failure      400  {object}  gin.H    "message: Bad Request"
+// @Failure      502  {object}  gin.H    "message: Bad Gateway"
+// @Router       /api/item/:name [get]
 func (itemcontroller *ItemController) GetItem(ctx *gin.Context) {
 	itemname := ctx.Param("name")
 	item, err := itemcontroller.ItemService.GetItem(&itemname)
@@ -54,8 +77,29 @@ func (itemcontroller *ItemController) GetItem(ctx *gin.Context) {
 
 }
 
+// GetAllItem godoc
+// @Summary      Get all items with pagination
+// @Description  Get all items with optional pagination parameters
+// @Tags         item
+// @Accept       json
+// @Produce      json
+// @Param        _start   query    integer  false  "Start index for pagination"
+// @Param        _end     query    integer  false  "End index for pagination"
+// @Success      200  {array}   models.Item
+// @Failure      400  {object}  gin.H    "message: Bad Request"
+// @Failure      502  {object}  gin.H    "message: Bad Gateway"
+// @Router       /api/item [get]
 func (itemcontroller *ItemController) GetAllItem(ctx *gin.Context) {
-	allitem, err := itemcontroller.ItemService.GetAllItem()
+	// Extract the start and end query parameters
+	start := ctx.DefaultQuery("_start", "0")
+	end := ctx.DefaultQuery("_end", "4")
+
+	// Convert the start and end values to integers
+	startInt, _ := strconv.Atoi(start)
+	endInt, _ := strconv.Atoi(end)
+
+	// Call the GetAllItem method with the start and end values
+	allitem, err := itemcontroller.ItemService.GetAllItem(ctx, startInt, endInt)
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"message": err.Error()})
 		return
@@ -64,7 +108,19 @@ func (itemcontroller *ItemController) GetAllItem(ctx *gin.Context) {
 
 }
 
+// UpdateItem godoc
+// @Summary      Update an item
+// @Description  Update an item with new data
+// @Tags         item
+// @Accept       json
+// @Produce      json
+// @Param        item     body     models.Item  true  "Item object to update"
+// @Success      200  {object}  gin.H         "message: Successfully Updated"
+// @Failure      400  {object}  gin.H         "message: Bad Request"
+// @Failure      502  {object}  gin.H         "message: Bad Gateway"
+// @Router       /api/item [patch]
 func (itemcontroller *ItemController) UpdateItem(ctx *gin.Context) {
+
 	var item models.Item
 	if err := ctx.ShouldBindJSON(&item); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
@@ -76,8 +132,19 @@ func (itemcontroller *ItemController) UpdateItem(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "successfully Updated"})
-
 }
+
+// UpdateWholeItem godoc
+// @Summary      Update the whole item
+// @Description  Update the whole item with new data
+// @Tags         item
+// @Accept       json
+// @Produce      json
+// @Param        item     body     models.Item  true  "Item object to update"
+// @Success      200  {object}  gin.H         "message: Successfully Updated the Whole item"
+// @Failure      400  {object}  gin.H         "message: Bad Request"
+// @Failure      502  {object}  gin.H         "message: Bad Gateway"
+// @Router       /api/item [put]
 func (itemcontroller *ItemController) UpdateWholeItem(ctx *gin.Context) {
 	var item models.Item
 	if err := ctx.ShouldBindJSON(&item); err != nil {
@@ -92,6 +159,17 @@ func (itemcontroller *ItemController) UpdateWholeItem(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "successfully Updated the Whole item"})
 }
 
+// DeleteItem godoc
+// @Summary      Delete an item
+// @Description  Delete an item by name
+// @Tags         item
+// @Accept       json
+// @Produce      json
+// @Param        name     path     string  true  "Item name to delete"
+// @Success      200  {object}  gin.H   "message: Successfully Deleted"
+// @Failure      400  {object}  gin.H   "message: Bad Gateway"
+// @Failure      404  {object}  gin.H   "message: Not Found"
+// @Router       /items/{name} [delete]
 func (itemcontroller *ItemController) DeleteItem(ctx *gin.Context) {
 	var itemname string = ctx.Param("name")
 	err := itemcontroller.ItemService.DeleteItem(&itemname)
@@ -103,15 +181,12 @@ func (itemcontroller *ItemController) DeleteItem(ctx *gin.Context) {
 }
 
 // now we will define the routes. for that we will create the receiv er method..
-func (itemcontroller *ItemController) RegisterItemRoues(rg *gin.RouterGroup) {
-
-	// here we are grouping all the item-routes
-	// under one name called as itemr
+func (itemcontroller *ItemController) RegisterItemRoutes(rg *gin.RouterGroup) {
 	itemroute := rg.Group("/item")
 	itemroute.POST("", itemcontroller.CreateItem)
 	itemroute.GET("/:name", itemcontroller.GetItem)
 	itemroute.GET("", itemcontroller.GetAllItem)
-	itemroute.PATCH("/", itemcontroller.UpdateItem)
-	itemroute.PUT("/", itemcontroller.UpdateWholeItem)
+	itemroute.PATCH("", itemcontroller.UpdateItem)
+	itemroute.PUT("", itemcontroller.UpdateWholeItem)
 	itemroute.DELETE("/:name", itemcontroller.DeleteItem)
 }

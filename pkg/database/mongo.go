@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/spf13/viper"
+	masteryaml "github.com/Dazzler/My-RestServer/pkg/util"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -12,7 +12,7 @@ import (
 type DatabaseConfig struct {
 	Host     string `yaml:"host"`
 	Port     int    `yaml:"port"`
-	Name     string `yaml:"name"`
+	DbName   string `yaml:"dbname"`
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
 }
@@ -22,29 +22,29 @@ type Config struct {
 
 var (
 	client *mongo.Client
-	err    error
 )
 
 func ConnectToMongoDB() (*mongo.Database, error) {
 
-	viper.SetConfigFile("../config/master.yaml")
-	err = viper.ReadInConfig()
-	if err != nil {
+	// viper.SetConfigFile("../config/master.yaml")
+	// err = viper.ReadInConfig()
+	// if err != nil {
 
-		return nil, fmt.Errorf("failed to read the file")
-	}
+	// 	return nil, fmt.Errorf("failed to read the file")
+	// }
 
-	config := Config{}
-	fmt.Println("viper.ReadConfig()", config)
+	// config := Config{}
+	// fmt.Println("viper.ReadConfig()", config)
 
-	err = viper.Unmarshal(&config)
+	// err = viper.Unmarshal(&config)
+	config, err := masteryaml.ExtractYamlForDB()
 	if err != nil {
 
 		return nil, fmt.Errorf("failed to unmarshal")
 	}
 
 	connectionString := fmt.Sprintf("mongodb://%s:%s@%s:%v", config.Database.Username, config.Database.Password, config.Database.Host, config.Database.Port)
-
+	fmt.Println("connectionString", connectionString)
 	clientOptions := options.Client().ApplyURI(connectionString)
 
 	client, err = mongo.Connect(context.TODO(), clientOptions)
@@ -60,7 +60,7 @@ func ConnectToMongoDB() (*mongo.Database, error) {
 	}
 
 	fmt.Println("Connection established with MongoDB.")
-	db := client.Database("test-server")
+	db := client.Database(config.Database.DbName)
 	return db, nil
 }
 

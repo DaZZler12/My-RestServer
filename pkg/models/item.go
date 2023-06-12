@@ -1,13 +1,18 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type Item struct {
-	Brand     string  `json:"brand" bson:"brand"`
-	Model     string  `json:"model" bson:"model"`
-	Item_Name string  `json:"item_name" bson:"item_name"`
-	Year      int64   `json:"year" bson:"year"`
-	Price     float64 `json:"price" bson:"price"`
+	Brand     string    `json:"brand" bson:"brand"`
+	Model     string    `json:"model" bson:"model"`
+	Item_Name string    `json:"item_name" bson:"item_name"`
+	Year      int64     `json:"year" bson:"year"`
+	Price     float64   `json:"price" bson:"price"`
+	CreatedAt time.Time `json:"created_at" bson:"created_at"`
 }
 
 type User struct {

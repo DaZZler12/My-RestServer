@@ -6,8 +6,8 @@ import (
 )
 
 // SetupAuthRoutes initializes the authentication routes
-func SetupAuthRoutes(r *gin.Engine, uhandler handler.UserController) {
-	authGroup := r.Group("/auth")
+func SetupAuthRoutes(server *gin.Engine, uhandler handler.UserController) {
+	authGroup := server.Group("/auth")
 
 	// Register the user-related routes under the authGroup
 	authGroup.POST("/signup", uhandler.Signup)
